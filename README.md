@@ -21,6 +21,6 @@ Virtuemart products module (included in your Virtuemart installation) must be in
 
 Related links
 -------------
-- [JED entry of this extension, please make sure to rate if you use this extension](Coming)
+- JED entry of this extension, please make sure to rate if you use this extension(TBA)
 - [Virtuemart](http://Virtuemart.net)
 - [Widgetkit](http://www.yootheme.com/widgetkit)
