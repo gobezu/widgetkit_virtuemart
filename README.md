@@ -18,3 +18,9 @@ Layout overrides
 Requirements
 ------------
 Virtuemart products module (included in your Virtuemart installation) must be installed but not necessarily activated
+
+Related links
+-------------
+- [JED entry of this extension, please make sure to rate if you use this extension](Coming)
+- [Virtuemart](http://Virtuemart.net)
+- [Widgetkit](http://www.yootheme.com/widgetkit)
