@@ -100,7 +100,7 @@ class VirtuemartWidget {
 	}
         
 	public function edit($id = null) {
-                $xml    = simplexml_load_file($this->widgetkit['path']->path("{$this->type}:{$this->type}.xml"));
+                $xml = simplexml_load_file($this->widgetkit['path']->path("{$this->type}:{$this->type}.xml"));
                 $type = $this->type;
 		$widget = $this->widgetkit[$this->type]->get($id ? $id : $this->widgetkit['request']->get('id', 'int'));
                 $this->widgetkit['path']->register($this->widgetkit['path']->path('widgetkit_virtuemart.root:layouts'), 'layouts');
@@ -121,7 +121,7 @@ class VirtuemartWidget {
                 $grp = 'params';
 
                 $exclFlds = array(
-                        'mod_virtuemart_product'=>array('moduleclass_sfx', 'layout', 'products_per_row', 'display_style', 'show_addtocart', 'headerText', 'footerText')
+                        'mod_virtuemart_product'=>array('moduleclass_sfx', 'layout', 'products_per_row', 'display_style', 'headerText', 'footerText')
                 );
 
                 $inclFldSets = array(
@@ -130,15 +130,14 @@ class VirtuemartWidget {
 
                 $exclFlds = (array) $exclFlds[$module];
                 $inclFldSets = (array) $inclFldSets[$module];
-
-                $frm = JForm::getInstance(
-                        'virtuemartwidget', 
-                        JPATH_SITE.'/modules/'.$module.'/'.$module.'.xml', 
-                        array(), 
-                        true, 
-                        '//config'
+                $frm = JFile::read(JPATH_SITE.'/modules/'.$module.'/'.$module.'.xml');
+                $frm = preg_replace(
+                        '#</fieldset>#', 
+                        '<field name="caption_part" type="list" default="" label="Caption part"><option value="">No caption</option><option value="product_s_desc">Short description</option><option value="product_desc">Product description</option><option value="name">Name</option></field></fieldset>', 
+                        $frm, 
+                        1
                 );
-
+                $frm = JForm::getInstance('virtuemartwidget', $frm, array(), true, '//config');
                 $fss = $frm->getFieldsets();
                 $modHTML = array(JHtml::_('sliders.start', 'module-sliders'));
                 $addedModule = false;
@@ -172,11 +171,9 @@ class VirtuemartWidget {
                                         $hiddenFlds[] = $input;
                                 }
                         }
-
+                        
                         if (!$addedModule) {
                                 $hiddenFlds[] = '<input type="hidden" name="params[module]" value="'.$module.'" />';
-                                $moduleId = isset($widget->virtuemart['module_id']) ? $widget->virtuemart['module_id'] : '';
-                                $hiddenFlds[] = '<input type="hidden" name="params[module_id]" value="'.$moduleId.'" />';
                                 $addedModule = true;
                         }
 
@@ -208,7 +205,9 @@ class VirtuemartWidget {
                         $widgetItems[$i]['title'] = $item->product_name;
                         $widgetItems[$i]['content'] = $widgetKit['widgetkitvirtuemart']->renderItem($item, $params);
                         $widgetItems[$i]['navigation'] = $item->product_name;
-                        $widgetItems[$i]['caption'] = $item->product_s_desc;
+                        $widgetItems[$i]['caption'] = '';
+                        $part = $params->get('caption_part', '');
+                        $widgetItems[$i]['caption'] = empty($part) ? '' : $item->$part;
                 }
                 return $widgetItems;
         }
