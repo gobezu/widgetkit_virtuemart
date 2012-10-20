@@ -5,7 +5,7 @@ You don't need any additional knowledge to get this going:
 - go to the Widgetkit component and click on "Use Virtuemart"
 - you will be presented with the already familiar options of:
     - which products to select from Virtuemart
-    - how to display the selected products in WidgetKit
+    - how to display the selected products in Widgetkit
 
 Layout overrides
 ----------------
