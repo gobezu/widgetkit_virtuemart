@@ -1,3 +1,8 @@
+<?php 
+//$Copyright$
+defined('_JEXEC') or die('Restricted access'); 
+?>
+
 <div class="wkvm-product">
         <?php echo $image; ?>
         <div class="clear"></div>

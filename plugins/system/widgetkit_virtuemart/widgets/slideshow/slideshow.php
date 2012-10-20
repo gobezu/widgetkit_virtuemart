@@ -7,6 +7,9 @@
 * @copyright Copyright (C) YOOtheme GmbH
 * @license   http://www.gnu.org/licenses/gpl.html GNU/GPL
 */
+
+defined('_JEXEC') or die('Restricted access');
+
 class VirtuemartSlideshow extends VirtuemartWidget {}
 
 new VirtuemartSlideshow();
