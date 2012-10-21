@@ -1,6 +1,17 @@
 <?php 
 //$Copyright$
-defined('_JEXEC') or die('Restricted access'); 
+
+defined('_JEXEC') or die('Restricted access');
+
+/* Available displayable parts are:
+ * - $image
+ * - $name
+ * - $prices
+ * - $cart
+ * - $description
+ * - $short_description
+ * - $url
+ */
 ?>
 
 <div class="wkvm-product">
