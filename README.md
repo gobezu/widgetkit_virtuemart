@@ -1,4 +1,6 @@
-Widgetkit Virtuemart pulls together Virtuemart and Widgetkit displaying Virtuemart products with Widgetkit anywhere on your site.
+Pulls together Virtuemart and Widgetkit and provides the following functionalities:
+- displaying Virtuemart products with Widgetkit anywhere on your site and
+- product detail images replaced with Widgetkit gallery or slideshow, either by using the `[wkvm]` plugin code in your product description or through the provided field `$this->product->wkvm` in your layout (sample layout is provided in the samples folder which you can copy to your `SITEROOT/templates/YOURTEMPLATE/html/com_virtuemart/productdetails/default_images.php`.
 
 You don't need any additional knowledge to get this going:
 - install and activate the plugin located in the system folder
