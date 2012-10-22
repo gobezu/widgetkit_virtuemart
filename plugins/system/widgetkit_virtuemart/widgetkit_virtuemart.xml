@@ -50,7 +50,6 @@
                                 </field>
                                 <field name="widget_style_gallery" type="folderlist" default="default" hide_none="true" label="Gallery style" directory="media/widgetkit/widgets/gallery/styles" filter="" exclude="" />
                                 <field name="widget_style_slideshow" type="folderlist" default="default" hide_none="true" label="Slideshow style" directory="media/widgetkit/widgets/slideshow/styles" filter="" exclude="" />
-                                <field name="widget_style_slideset" type="folderlist" default="default" hide_none="true" label="Slideset style" directory="media/widgetkit/widgets/slideset/styles" filter="" exclude="" />
                                 <field name="caption_part" type="list" default="" label="Caption part">
                                         <option value="">None</option>
                                         <option value="file_title">Title</option>
@@ -70,10 +69,16 @@
                                         <option value="before">Before</option>
                                         <option value="after">After</option>
                                 </field>                                
-                                <field name="keep_synch" type="radio" default="0" label="Keep synch">
+                                <field name="keep_synch" type="radio" default="0" label="Keep synch" description="Each time product is viewed we will update the automatically created slideshow/gallery. This is only desirable if you have a product definition that is dynamic and from performance point of view not recommendable.">
                                         <option value="0">No</option>
                                         <option value="1">Yes</option>
                                 </field>
+                                <field name="thumb_size_source" type="radio" default="custom" label="Thumb size source">
+                                        <option value="vm">Virtuemart configuration</option>
+                                        <option value="custom">Custom (provide below)</option>
+                                </field>
+                                <field name="thumb_width" type="text" default="100" label="Thumb width" />
+                                <field name="thumb_height" type="text" default="100" label="Thumb height" />
                         </fieldset>
                 </fields>
         </config>

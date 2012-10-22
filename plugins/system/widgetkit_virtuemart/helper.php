@@ -183,11 +183,10 @@ class WidgetkitVirtuemartWidgetkitHelper extends WidgetkitHelper {
                                 $file = preg_replace('/^(\/|)images/', '', $image->file_url);
                                 $path = preg_replace('/^(\/|)images/', '', $image->file_url_folder);
                                 if (!in_array($path, $paths)) $paths[] = $path;
-                                $captions[$file] = $image->$captionPart;
+                                $captions[$file] = $captionPart ? $image->$captionPart : '';
                                 $links[$file] = '';
                         }
                         
-                
                         $data = array(
                                 'type' => $type, 
                                 'id' => $widget->id,
@@ -234,6 +233,23 @@ class WidgetkitVirtuemartWidgetkitHelper extends WidgetkitHelper {
                                 'style' => $style,
                                 'items' => $items
                         );                        
+                }
+                
+                $data['settings']['style'] = $style;
+                $source = $params->get('thumb_size_source', 'custom');
+                
+                if ($source == 'custom') {
+                        $data['settings']['thumb_width'] = $params->get('thumb_width', 100);
+                        $data['settings']['thumb_height'] = $params->get('thumb_height', 100);
+                } else if ($source == 'vm') {
+                        if (!class_exists('VmConfig')) {
+                                require_once JPATH_ADMINISTRATOR . '/components/com_virtuemart/helpers/config.php';
+                        }
+                        
+                        VmConfig::loadConfig();
+                        
+                        $data['settings']['thumb_width'] = VmConfig::get('img_width', $params->get('thumb_width', 100));
+                        $data['settings']['thumb_height'] = VmConfig::get('img_height', $params->get('thumb_height', 100));
                 }
                 
                 return $wh->save($data);
