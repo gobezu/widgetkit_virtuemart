@@ -15,9 +15,37 @@ jimport('joomla.plugin.plugin');
 
 class plgSystemWidgetkit_Virtuemart extends JPlugin {
 	public $widgetkit;
+        
+        public function onContentPrepare($context, &$product, &$params, $limitstart) {
+                if (!$product || !isset($product->virtuemart_product_id) || !(bool) $this->params->get('product_detail', 1)) {
+                        $product->text = str_replace('[wkvm]', '', $product->text);
+                        return '';
+                }
+                
+                $product_model = VmModel::getModel('product');
+                $product_model->addImages($product);
+                
+                $wkvm = WidgetkitVirtuemartWidgetkitHelper::render($product, $this->params);
+                $product->wkvm = $wkvm;
+                
+                preg_match_all('#\[wkvm\]#', $product->text, $matches);
+                
+                if (count($matches) > 1 && count($matches[1]) > 0) {
+                        foreach ($matches[1] as $i => $match) {
+                                $product->text = str_replace($matches[0][$i], $wkvm, $product->text);
+                        }
+                }
+                
+                return '';                
+        }
+        
+        public function plgVmOnDeleteProduct($product, $ok) {
+                WidgetkitVirtuemartWidgetkitHelper::delete($product);
+        }
 
 	public function onAfterInitialise() {
 		jimport('joomla.filesystem.file');
+                
 		if (!JFile::exists(JPATH_ADMINISTRATOR.'/components/com_widgetkit/classes/widgetkit.php')
 				|| !JComponentHelper::getComponent('com_widgetkit', true)->enabled) {
 			return;

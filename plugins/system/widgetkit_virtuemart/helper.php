@@ -111,4 +111,185 @@ class WidgetkitVirtuemartWidgetkitHelper extends WidgetkitHelper {
                 return $products;
         }
 
+        private static function getWidget($productId, $type, $onlyRetrieve = false) {
+                $name = 'wkvm_auto_'.$productId;
+                $db = JFactory::getDbo();
+                
+                $db->setQuery('SELECT id, name, content FROM #__widgetkit_widget WHERE name = '.$db->quote($name));
+                
+                $rec = $db->loadObject();
+                
+                if ($onlyRetrieve) return $rec;
+                
+                if ($rec) {
+                        $rec->content = json_decode($rec->content);
+                        $rec->settings = $rec->content->settings;
+                } else {
+                        static $map = array(
+                                'gallery' => array('style'=>'default','width'=>'auto','height'=>'auto','autoplay'=>1,'order'=>'default','interval'=>5000,'duration'=>500,'index'=>0,'navigation'=>1,'buttons'=>1,'slices'=>20,'animated'=>'randomSimple','caption_animation_duration'=>500,'lightbox'=>0),
+                                'slideshow' => array('style'=>'default','width'=>'auto','height'=>'auto','autoplay'=>1,'order'=>'default','interval'=>5000,'duration'=>500,'index'=>0,'navigation'=>1,'buttons'=>1,'slices'=>20,'animated'=>'randomSimple','caption_animation_duration'=>500),
+                                'slideset' => array('style'=>'default','width'=>'auto','height'=>'auto','autoplay'=>1,'interval'=>5000,'index'=>0,'navigation'=>1,'buttons'=>1,'title'=>1,'duration'=>300,'items_per_set'=>3,'effect'=>'slide'),
+                                'accordion' => array('style'=>'default','width'=>'auto','order'=>'default','duration'=>500,'index'=>0,'collapseall'=>1,'matchheight'=>1)
+                        );
+
+                        $defaultSettings = $map[$type];
+                        $settings = array();
+                        $isWidthSet = false;
+                        
+                        foreach ($defaultSettings as $key => $defaultSetting) {
+                                if (!isset($settings[$key]) || empty($settings[$key]) && $settings[$key] !== '0' && $settings[$key] !== 0) {
+                                        $settings[$key] = $defaultSetting;
+                                }
+                                
+                                if ($key == 'width' && !empty($settings[$key])) $isWidthSet = true;
+                        }
+                                                
+                        $rec = new stdClass();
+                        $rec->id = '';
+                        $rec->content = '';
+                        $rec->settings = $settings;
+                        $rec->name = $name;
+                }
+                
+                return $rec;
+        } 
+        
+        private static function save($product, $params) {
+                $type = $params->get('widget_type', 'gallery');
+                $widget = self::getWidget($product->virtuemart_product_id, $type);
+                
+                if (!empty($widget) && !empty($widget->id) && !(bool) $params->get('keep_synch', 0)) return $widget->id;
+                
+                $widgetkit = Widgetkit::getInstance();
+                $wh = $widgetkit->getHelper('widget');
+                
+                $style = $params->get('widget_style_'.$type, 'default');
+                $images = $product->images;
+                
+                if (empty($images)) {
+                        if (!empty($widget) && !empty($widget->id)) $wh->delete($widget->id);
+                        
+                        return true;
+                }
+                
+                $captionPart = $params->get('caption_part', '');
+                
+                if ($type == 'gallery') {
+                        $paths = array();
+                        $captions = array();
+                        $links = array();
+
+                        foreach ($images as $image) {
+                                $file = preg_replace('/^(\/|)images/', '', $image->file_url);
+                                $path = preg_replace('/^(\/|)images/', '', $image->file_url_folder);
+                                if (!in_array($path, $paths)) $paths[] = $path;
+                                $captions[$file] = $image->$captionPart;
+                                $links[$file] = '';
+                        }
+                        
+                
+                        $data = array(
+                                'type' => $type, 
+                                'id' => $widget->id,
+                                'name' => $widget->name, 
+                                'settings' => $widget->settings,
+                                'style' => $style,
+                                'captions' => $captions,
+                                'links' => $links,
+                                'paths' => $paths
+                        );                        
+                } else if ($type == 'slideshow') {
+                        $items = array();
+                        $titlePart = $params->get('title_part');
+                        $contentPart = $params->get('content_part', '');
+                        $contentPartPosition = $params->get('content_part_position', '');
+                        $url = JURI::base();
+                        
+                        foreach ($images as $image) {
+                                $id = uniqid();
+                                $title = $titlePart ? $image->$titlePart : '';
+                                $caption = $captionPart ? $image->$captionPart : '';
+                                $alt = $image->file_meta;
+                                
+                                if (!$alt) $alt = $caption ? $caption : $title;
+                                
+                                $content = JHtml::image($url.$image->file_url, $alt);
+                                
+                                if ($contentPart) {
+                                        if ($contentPartPosition == 'before') {
+                                                $content = $image->$contentPart . $content;
+                                        } else {
+                                                $content = $content . $image->$contentPart;
+                                        }
+                                }
+                                
+                                $items[$id] = array('title'=>$title, 'content'=>$content, 'caption'=>$caption);
+                        }
+                        
+                        $data = array(
+                                'type' => $type, 
+                                'id' => $widget->id,
+                                'name' => $widget->name, 
+                                'settings' => $widget->settings,
+                                'style' => $style,
+                                'items' => $items
+                        );                        
+                }
+                
+                return $wh->save($data);
+        }
+        
+        public static function delete($productId) {
+                $params = self::isInstalled();
+                
+                if (!$params) return false;
+                
+                $widget = self::getWidget($productId, null, true);
+                
+                if (!$widget) return;
+                
+                $widgetkit = Widgetkit::getInstance();
+                $wh = $widgetkit->getHelper('widget');
+                
+                return $wh->delete($widget->id);                
+        }        
+        
+        public static function render($product, $params) {
+                if (!self::isInstalled()) return '';
+                
+                $widgetId = self::save($product, $params);
+                $widgetkit = Widgetkit::getInstance();
+                $wh = $widgetkit->getHelper('widget');
+                
+                $out = $wh->render($widgetId);
+                
+                return $out;
+        }
+        
+        private static function isInstalled() {
+                jimport('joomla.filesystem.file');
+                
+                if (!JFile::exists(JPATH_ADMINISTRATOR.'/components/com_widgetkit/classes/widgetkit.php')
+				|| !JComponentHelper::getComponent('com_widgetkit', true)->enabled) {
+                        trigger_error('<b>Widgetkit Virtuemart plugin</b>: Widgetkit is not installed.');
+                        return;
+                }
+                
+                require_once JPATH_ADMINISTRATOR.'/components/com_widgetkit/widgetkit.php';
+                
+                return true;
+                
+//                jimport('joomla.plugin');
+//                
+//                $plg = JPluginHelper::getPlugin('system', 'widgetkit_virtuemart');
+//                
+//                if (!$plg) {
+//                        trigger_error('<b>Widgetkit Virtuemart plugin</b>: Widgetkit Virtuemart is either not installed properly or disabled.');
+//                        return;
+//                }
+//                
+//                $params = new JRegistry($plg->params);
+//                
+//                return $params;
+        }
 }

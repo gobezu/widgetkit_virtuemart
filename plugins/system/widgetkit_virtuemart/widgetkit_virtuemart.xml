@@ -11,18 +11,28 @@
 	<version>$Ver$</version>
 	<description><![CDATA[
                 <p>Widgetkit plugin for Virtuemart</p>
-                <p>Pulls together Virtuemart and Widgetkit displaying Virtuemart products with Widgetkit anywhere on your site. Inspired by widgetkit_joomla plugin developed by YOOtheme and mod_virtuemart_product developed by The VirtueMart Development Team.</p>
+                <p>Pulls together Virtuemart and Widgetkit and provides the following functionalities:
+                        <ul style="padding-left:30px;">
+                                <li style="list-style:inherit;">displaying Virtuemart products with Widgetkit anywhere on your site and</li>
+                                <li style="list-style:inherit;">product detail images replaced with Widgetkit gallery or slideshow, either by using the [wkvm] plugin code or through the provided field $this->product->wkvm in your layout (sample layout is provided in the samples folder which you can copy to your SITEROOT/templates/YOURTEMPLATE/html/com_virtuemart/productdetails/default_images.php.</li>
+                        </ul>
+                </p>
                 <p>Requirements:
-                <ul>
-                        <li>The Virtuemart product module must be installed but not necessarily activated</li>
-                        <li>widgetkit - either lite or full version installed and widgetkits content and system plugin activated</li>
-                </ul></p>
+                <ul style="padding-left:30px;">
+                        <li style="list-style:inherit;">the Virtuemart product module must be installed but not necessarily activated</li>
+                        <li style="list-style:inherit;">widgetkit - either lite or full version installed and widgetkits content and system plugin activated</li>
+                </ul>
+                </p>
+                <p>
+                        Inspired by widgetkit_joomla plugin developed by YOOtheme and mod_virtuemart_product module developed by The VirtueMart Development Team.
+                </p>
                 ]]>
         </description>
 	<files>
 		<filename plugin="widgetkit_virtuemart">widgetkit_virtuemart.php</filename>
 		<folder>assets</folder>
 		<folder>layouts</folder>
+		<folder>samples</folder>
 		<folder>widgets</folder>
 		<file>helper.php</file>
                 <file>index.html</file>
@@ -30,6 +40,40 @@
         <config>
                 <fields name="params">
                         <fieldset name="basic">
+                                <field name="product_detail" type="radio" default="1" label="Used in product detail images">
+                                        <option value="0">No</option>
+                                        <option value="1">Yes</option>
+                                </field>
+                                <field name="widget_type" type="list" label="Widget type used for product detail images" default="gallery">
+                                        <option value="gallery">Gallery</option>
+                                        <option value="slideshow">Slideshow</option>
+                                </field>
+                                <field name="widget_style_gallery" type="folderlist" default="default" hide_none="true" label="Gallery style" directory="media/widgetkit/widgets/gallery/styles" filter="" exclude="" />
+                                <field name="widget_style_slideshow" type="folderlist" default="default" hide_none="true" label="Slideshow style" directory="media/widgetkit/widgets/slideshow/styles" filter="" exclude="" />
+                                <field name="widget_style_slideset" type="folderlist" default="default" hide_none="true" label="Slideset style" directory="media/widgetkit/widgets/slideset/styles" filter="" exclude="" />
+                                <field name="caption_part" type="list" default="" label="Caption part">
+                                        <option value="">None</option>
+                                        <option value="file_title">Title</option>
+                                        <option value="file_description">Description</option>
+                                </field>
+                                <field name="title_part" type="list" default="" label="Title part (applies only to slideshow)">
+                                        <option value="">None</option>
+                                        <option value="file_title">Title</option>
+                                        <option value="file_description">Description</option>
+                                </field>                                
+                                <field name="content_part" type="list" default="" label="Content part (applies only to slideshow)">
+                                        <option value="">None</option>
+                                        <option value="file_title">Title</option>
+                                        <option value="file_description">Description</option>
+                                </field>                                
+                                <field name="content_part_position" type="radio" default="after" label="Content part position (applies only to slideshow)">
+                                        <option value="before">Before</option>
+                                        <option value="after">After</option>
+                                </field>                                
+                                <field name="keep_synch" type="radio" default="0" label="Keep synch">
+                                        <option value="0">No</option>
+                                        <option value="1">Yes</option>
+                                </field>
                         </fieldset>
                 </fields>
         </config>
