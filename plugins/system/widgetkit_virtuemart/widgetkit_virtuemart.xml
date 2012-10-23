@@ -69,10 +69,6 @@
                                         <option value="before">Before</option>
                                         <option value="after">After</option>
                                 </field>                                
-                                <field name="keep_synch" type="radio" default="0" label="Keep synch" description="Each time product is viewed we will update the automatically created slideshow/gallery. This is only desirable if you have a product definition that is dynamic and from performance point of view not recommendable.">
-                                        <option value="0">No</option>
-                                        <option value="1">Yes</option>
-                                </field>
                                 <field name="thumb_size_source" type="radio" default="custom" label="Thumb size source">
                                         <option value="vm">Virtuemart configuration</option>
                                         <option value="custom">Custom (provide below)</option>

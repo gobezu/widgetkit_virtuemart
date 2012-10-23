@@ -42,7 +42,9 @@ class plgSystemWidgetkit_Virtuemart extends JPlugin {
         public function plgVmOnDeleteProduct($product, $ok) {
                 WidgetkitVirtuemartWidgetkitHelper::delete($product);
         }
-
+        
+        private static $SESSIONID = 'WKVM_SESSION';
+        
 	public function onAfterInitialise() {
 		jimport('joomla.filesystem.file');
                 
@@ -66,6 +68,28 @@ class plgSystemWidgetkit_Virtuemart extends JPlugin {
 		$this->widgetkit['event']->bind('site', array($this, 'init'));
 		$this->widgetkit['event']->bind('site', array($this, 'loadAssets'));
 		$this->widgetkit['event']->bind('widgetoutput', array($this, '_applycontentplugins'));
+                
+                $input = JFactory::getApplication()->input;
+                $option = $input->get('option', '', 'cmd');
+                $task = $input->get('task', '', 'cmd');
+                
+                if ($option == 'com_virtuemart') {
+                        $session = JFactory::getSession();
+                        
+                        if ($task == 'save' || $task == 'apply') {
+                                $id = $input->get('virtuemart_product_id', array(), 'array');
+                                $id = $id[key($id)];
+                                $session->set(self::$SESSIONID, $id);
+                        } else {
+                                $id = $session->get(self::$SESSIONID);
+                                
+                                if ($id) {
+                                        WidgetkitVirtuemartWidgetkitHelper::delete($id);
+                                        $session->clear(self::$SESSIONID);
+                                        JFactory::getApplication()->enqueueMessage(JText::_('Widgetkit gallery of product reset'), 'info');
+                                }
+                        }
+                }
 	}
 
 	public function init() {

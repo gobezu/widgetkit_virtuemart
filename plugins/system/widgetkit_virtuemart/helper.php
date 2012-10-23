@@ -158,7 +158,7 @@ class WidgetkitVirtuemartWidgetkitHelper extends WidgetkitHelper {
                 $type = $params->get('widget_type', 'gallery');
                 $widget = self::getWidget($product->virtuemart_product_id, $type);
                 
-                if (!empty($widget) && !empty($widget->id) && !(bool) $params->get('keep_synch', 0)) return $widget->id;
+                if (!empty($widget) && !empty($widget->id)) return $widget->id;
                 
                 $widgetkit = Widgetkit::getInstance();
                 $wh = $widgetkit->getHelper('widget');
