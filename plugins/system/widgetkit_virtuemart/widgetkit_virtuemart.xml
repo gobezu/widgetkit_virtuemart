@@ -37,7 +37,7 @@
 		<file>helper.php</file>
                 <file>index.html</file>
 	</files>
-        <languages>
+        <languages folder="language">
                 <language tag="en-GB">en-GB.plg_system_widgetkit_virtuemart.ini</language>
         </languages>        
         <config>
