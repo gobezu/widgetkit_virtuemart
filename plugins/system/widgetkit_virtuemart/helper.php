@@ -111,7 +111,7 @@ class WidgetkitVirtuemartWidgetkitHelper extends WidgetkitHelper {
                 return $products;
         }
 
-        private static function getWidget($productId, $type, $onlyRetrieve = false) {
+        private static function getWidget($productId, $type, $onlyRetrieve = false, $params = array()) {
                 $name = 'wkvm_auto_'.$productId;
                 $db = JFactory::getDbo();
                 
@@ -125,25 +125,28 @@ class WidgetkitVirtuemartWidgetkitHelper extends WidgetkitHelper {
                         $rec->content = json_decode($rec->content);
                         $rec->settings = $rec->content->settings;
                 } else {
-                        static $map = array(
-                                'gallery' => array('style'=>'default','width'=>'auto','height'=>'auto','autoplay'=>1,'order'=>'default','interval'=>5000,'duration'=>500,'index'=>0,'navigation'=>1,'buttons'=>1,'slices'=>20,'animated'=>'randomSimple','caption_animation_duration'=>500,'lightbox'=>0),
-                                'slideshow' => array('style'=>'default','width'=>'auto','height'=>'auto','autoplay'=>1,'order'=>'default','interval'=>5000,'duration'=>500,'index'=>0,'navigation'=>1,'buttons'=>1,'slices'=>20,'animated'=>'randomSimple','caption_animation_duration'=>500),
-                                'slideset' => array('style'=>'default','width'=>'auto','height'=>'auto','autoplay'=>1,'interval'=>5000,'index'=>0,'navigation'=>1,'buttons'=>1,'title'=>1,'duration'=>300,'items_per_set'=>3,'effect'=>'slide'),
-                                'accordion' => array('style'=>'default','width'=>'auto','order'=>'default','duration'=>500,'index'=>0,'collapseall'=>1,'matchheight'=>1)
-                        );
-
-                        $defaultSettings = $map[$type];
-                        $settings = array();
-                        $isWidthSet = false;
-                        
-                        foreach ($defaultSettings as $key => $defaultSetting) {
-                                if (!isset($settings[$key]) || empty($settings[$key]) && $settings[$key] !== '0' && $settings[$key] !== 0) {
-                                        $settings[$key] = $defaultSetting;
-                                }
-                                
-                                if ($key == 'width' && !empty($settings[$key])) $isWidthSet = true;
-                        }
-                                                
+//                        static $map = array(
+//                                'gallery' => array('style'=>'default','width'=>'auto','height'=>'auto','autoplay'=>1,'order'=>'default','interval'=>5000,'duration'=>500,'index'=>0,'navigation'=>1,'buttons'=>1,'slices'=>20,'animated'=>'randomSimple','caption_animation_duration'=>500,'lightbox'=>0),
+//                                'slideshow' => array('style'=>'default','width'=>'auto','height'=>'auto','autoplay'=>1,'order'=>'default','interval'=>5000,'duration'=>500,'index'=>0,'navigation'=>1,'buttons'=>1,'slices'=>20,'animated'=>'randomSimple','caption_animation_duration'=>500),
+//                                'slideset' => array('style'=>'default','width'=>'auto','height'=>'auto','autoplay'=>1,'interval'=>5000,'index'=>0,'navigation'=>1,'buttons'=>1,'title'=>1,'duration'=>300,'items_per_set'=>3,'effect'=>'slide'),
+//                                'accordion' => array('style'=>'default','width'=>'auto','order'=>'default','duration'=>500,'index'=>0,'collapseall'=>1,'matchheight'=>1)
+//                        );
+//
+//                        $defaultSettings = $map[$type];
+//                        $settings = array();
+//                        $isWidthSet = false;
+//                        
+//                        foreach ($defaultSettings as $key => $defaultSetting) {
+//                                if (!isset($settings[$key]) || empty($settings[$key]) && $settings[$key] !== '0' && $settings[$key] !== 0) {
+//                                        $settings[$key] = $defaultSetting;
+//                                }
+//                                
+//                                if ($key == 'width' && !empty($settings[$key])) $isWidthSet = true;
+//                        }
+                        if ($params instanceof JRegistry) $params = $params->toArray();
+                        $keys = array_keys($params);
+                        $k = array_search('widget_style', $keys);
+                        $settings = $k !== false ? array_slice($params, $k + 1) : array();
                         $rec = new stdClass();
                         $rec->id = '';
                         $rec->content = '';
@@ -156,14 +159,14 @@ class WidgetkitVirtuemartWidgetkitHelper extends WidgetkitHelper {
         
         private static function save($product, $params) {
                 $type = $params->get('widget_type', 'gallery');
-                $widget = self::getWidget($product->virtuemart_product_id, $type);
+                $widget = self::getWidget($product->virtuemart_product_id, $type, false, $params);
                 
                 if (!empty($widget) && !empty($widget->id)) return $widget->id;
                 
                 $widgetkit = Widgetkit::getInstance();
                 $wh = $widgetkit->getHelper('widget');
                 
-                $style = $params->get('widget_style_'.$type, 'default');
+                $style = $params->get('widget_style', 'default');
                 $images = $product->images;
                 
                 if (empty($images)) {
@@ -201,6 +204,8 @@ class WidgetkitVirtuemartWidgetkitHelper extends WidgetkitHelper {
                         $items = array();
                         $titlePart = $params->get('title_part');
                         $contentPart = $params->get('content_part', '');
+                        $navigationPart = $params->get('navigation_part', '');
+                        $navigationPart = explode('+', $navigationPart);
                         $contentPartPosition = $params->get('content_part_position', '');
                         $url = JURI::base();
                         
@@ -223,6 +228,31 @@ class WidgetkitVirtuemartWidgetkitHelper extends WidgetkitHelper {
                                 }
                                 
                                 $items[$id] = array('title'=>$title, 'content'=>$content, 'caption'=>$caption);
+                                
+                                if (!empty($navigationPart)) {
+                                        $navigation = '';
+                                        
+                                        if (in_array('file_url_thumb', $navigationPart)) {
+                                                $navigation .= JHtml::image($url.$image->file_url_thumb, $alt);
+                                        }
+                                        
+                                        if (in_array('file_title', $navigationPart)) {
+                                                $navigation .= $image->file_title;
+                                        }
+                                        
+                                        if (in_array('file_description', $navigationPart)) {
+                                                $navigation .= $image->file_description;
+                                        }
+                                        
+                                        if ($navigation) {
+                                                $items[$id]['navigation'] = $navigation;
+                                        }
+                                }
+                                
+                                if (!empty($navigation)) {
+                                        $widget->settings['items_per_set'] = $params->get('items_per_set', 3);
+                                        $widget->settings['slideset_buttons'] = 1;
+                                }
                         }
                         
                         $data = array(
@@ -255,19 +285,23 @@ class WidgetkitVirtuemartWidgetkitHelper extends WidgetkitHelper {
                 return $wh->save($data);
         }
         
-        public static function delete($productId) {
-                $params = self::isInstalled();
+        public static function delete($productId = null) {
+                if (!self::isInstalled()) return false;
                 
-                if (!$params) return false;
-                
-                $widget = self::getWidget($productId, null, true);
-                
-                if (!$widget) return;
-                
-                $widgetkit = Widgetkit::getInstance();
-                $wh = $widgetkit->getHelper('widget');
-                
-                return $wh->delete($widget->id);                
+                if ($productId) {
+                        $widget = self::getWidget($productId, null, true);
+
+                        if (!$widget) return;
+
+                        $widgetkit = Widgetkit::getInstance();
+                        $wh = $widgetkit->getHelper('widget');
+
+                        return $wh->delete($widget->id);
+                } else {
+                        $db = JFactory::getDbo();
+                        $db->setQuery('DELETE FROM #__widgetkit_widget WHERE name LIKE "wkvm_auto_%"');
+                        $db->query();
+                }
         }        
         
         public static function render($product, $params) {

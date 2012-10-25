@@ -37,19 +37,22 @@
 		<file>helper.php</file>
                 <file>index.html</file>
 	</files>
+        <languages>
+                <language tag="en-GB">en-GB.plg_system_widgetkit_virtuemart.ini</language>
+        </languages>        
         <config>
                 <fields name="params">
                         <fieldset name="basic">
-                                <field name="product_detail" type="radio" default="1" label="Used in product detail images">
+                                <field name="product_detail" type="radio" default="0" label="Used in product detail images">
                                         <option value="0">No</option>
                                         <option value="1">Yes</option>
                                 </field>
-                                <field name="widget_type" type="list" label="Widget type used for product detail images" default="gallery">
-                                        <option value="gallery">Gallery</option>
+                                <field name="widget_type" type="list" label="Widget type used for product detail images" default="slideshow">
                                         <option value="slideshow">Slideshow</option>
+                                        <option value="gallery">Gallery (Implemented but not compatible with VM)</option>
+                                        <option value="slideset">Slideset (Not implemented yet)</option>
                                 </field>
-                                <field name="widget_style_gallery" type="folderlist" default="default" hide_none="true" label="Gallery style" directory="media/widgetkit/widgets/gallery/styles" filter="" exclude="" />
-                                <field name="widget_style_slideshow" type="folderlist" default="default" hide_none="true" label="Slideshow style" directory="media/widgetkit/widgets/slideshow/styles" filter="" exclude="" />
+                                <!-- <field name="widget_style" type="folderlist" default="default" hide_none="true" label="Widget style" description="If you have changed widget type please make sure to save in order to see the correct list of available styles for the changed type" directory="media/widgetkit/widgets/slideshow/styles" filter="" exclude="" />-->
                                 <field name="caption_part" type="list" default="" label="Caption part">
                                         <option value="">None</option>
                                         <option value="file_title">Title</option>
@@ -68,13 +71,38 @@
                                 <field name="content_part_position" type="radio" default="after" label="Content part position (applies only to slideshow)">
                                         <option value="before">Before</option>
                                         <option value="after">After</option>
-                                </field>                                
+                                </field>
+                                <field name="navigation_part" type="list" default="" label="Navigation">
+                                        <option value="">None</option>
+                                        <option value="file_title">Title</option>
+                                        <option value="file_description">Description</option>
+                                        <option value="file_url_thumb">Thumb</option>
+                                        <option value="file_url_thumb+file_title">Thumb and Title</option>
+                                        <option value="file_url_thumb+file_description">Thumb and Description</option>
+                                </field>
+                                <field name="items_per_set" type="list" default="3" label="Items per set">
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                        <option value="9">9</option>
+                                        <option value="10">10</option>
+                                        <option value="set">Use set name (apply only to slideset)</option>                                        
+                                </field>
                                 <field name="thumb_size_source" type="radio" default="custom" label="Thumb size source">
                                         <option value="vm">Virtuemart configuration</option>
                                         <option value="custom">Custom (provide below)</option>
                                 </field>
                                 <field name="thumb_width" type="text" default="100" label="Thumb width" />
                                 <field name="thumb_height" type="text" default="100" label="Thumb height" />
+                                <field name="keep_synch" type="radio" default="1" label="Clear existing widgets upon plugin save" description="Whenever you save the settings of this plugin you make changes that affect display of the images. In order to reflect the changes we delete all existing widgets and recreate each of them upon view of the product detail page.">
+                                        <option value="0">No</option>
+                                        <option value="1">Yes</option>
+                                </field>
                         </fieldset>
                 </fields>
         </config>

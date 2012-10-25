@@ -17,7 +17,7 @@ class plgSystemWidgetkit_Virtuemart extends JPlugin {
 	public $widgetkit;
         
         public function onContentPrepare($context, &$product, &$params, $limitstart) {
-                if (!$product || !isset($product->virtuemart_product_id) || !(bool) $this->params->get('product_detail', 1)) {
+                if (!$product || !isset($product->virtuemart_product_id) || !(bool) $this->params->get('product_detail', 0)) {
                         $product->text = str_replace('[wkvm]', '', $product->text);
                         return '';
                 }
@@ -27,16 +27,42 @@ class plgSystemWidgetkit_Virtuemart extends JPlugin {
                 
                 $wkvm = WidgetkitVirtuemartWidgetkitHelper::render($product, $this->params);
                 $product->wkvm = $wkvm;
-                
-                preg_match_all('#\[wkvm\]#', $product->text, $matches);
-                
-                if (count($matches) > 1 && count($matches[1]) > 0) {
-                        foreach ($matches[1] as $i => $match) {
-                                $product->text = str_replace($matches[0][$i], $wkvm, $product->text);
-                        }
-                }
+                $product->text = str_replace('[wkvm]', $wkvm, $product->text);
                 
                 return '';                
+        }
+        
+        public function onContentPrepareForm($form, $data) {
+                if ($form->getName() !== 'com_plugins.plugin') return;
+                
+                JFactory::getLanguage()->load('plg_system_widgetkit_virtuemart', JPATH_ADMINISTRATOR);                
+                
+                $type = isset($data->params['widget_type']) ? $data->params['widget_type'] : 'slideshow';
+                
+                jimport('joomla.filesystem.file');
+                $xml = JPATH_SITE.'/media/widgetkit/widgets/'.$type.'/'.$type.'.xml';
+                $xml = JFile::read($xml);
+                $xml = trim($xml);
+
+                $xml = str_replace(
+                        array('<widget>', '<settings>', '</widget>', '</settings>', 'setting'), 
+                        array('<form><fields name="params">', '<fieldset name="widgetstyle"><field type="spacer" name="generalsettingsseparator" label="General widget settings" />', '</fields></form>', '<field name="widget_style" type="folderlist" default="default" hide_none="true" label="Widget style" directory="media/widgetkit/widgets/'.$type.'/styles" filter="" exclude="" /><field type="spacer" name="specificsettingsseparator" label="Widget style specific settings" /></fieldset>', 'field'), 
+                        $xml
+                );
+                
+                // remove the style setting as the type is incompatible
+                // ofc we could define a field type but we really don't need it 
+                // as we already know the style
+                $xml = preg_replace('#<[^\>]+type=[\"\']style[\"\'][^\>]+>#', '', $xml);
+                $style = isset($data->params['widget_style']) ? $data->params['widget_style'] : 'default';
+                $sxml = simplexml_load_file(JPATH_SITE.'/media/widgetkit/widgets/'.$type.'/styles/'.$style.'/config.xml');
+
+                foreach ($sxml->xpath('///setting') as $field) {
+                        $field = str_replace('setting', 'field', $field->asXML());
+                        $xml = str_replace('</fieldset>', $field.'</fieldset>', $xml);
+                }
+                
+                $form->load($xml);
         }
         
         public function plgVmOnDeleteProduct($product, $ok) {
@@ -91,6 +117,12 @@ class plgSystemWidgetkit_Virtuemart extends JPlugin {
                         }
                 }
 	}
+        
+        public function onExtensionAfterSave($context, $data, $isNew) {
+                if ($data->element != 'widgetkit_virtuemart' || !(bool) $this->params->get('keep_synch', 1)) return;
+                
+                WidgetkitVirtuemartWidgetkitHelper::delete();
+        }
 
 	public function init() {
 		foreach ($this->widgetkit['path']->dirs('widgetkit_virtuemart.widgets:') as $widget) {
