@@ -33,7 +33,7 @@ class plgSystemWidgetkit_Virtuemart extends JPlugin {
         }
         
         public function onContentPrepareForm($form, $data) {
-                if ($form->getName() !== 'com_plugins.plugin') return;
+                if ($data->element != 'widgetkit_virtuemart') return;
                 
                 JFactory::getLanguage()->load('plg_system_widgetkit_virtuemart', JPATH_ADMINISTRATOR);                
                 
@@ -46,7 +46,7 @@ class plgSystemWidgetkit_Virtuemart extends JPlugin {
 
                 $xml = str_replace(
                         array('<widget>', '<settings>', '</widget>', '</settings>', 'setting'), 
-                        array('<form><fields name="params">', '<fieldset name="widgetstyle"><field type="spacer" name="generalsettingsseparator" label="General widget settings" />', '</fields></form>', '<field name="widget_style" type="folderlist" default="default" hide_none="true" label="Widget style" directory="media/widgetkit/widgets/'.$type.'/styles" filter="" exclude="" /><field type="spacer" name="specificsettingsseparator" label="Widget style specific settings" /></fieldset>', 'field'), 
+                        array('<form><fields name="params">', '<fieldset name="widgetstyle"><field name="widget_style" type="folderlist" default="default" hide_none="true" label="Widget style" directory="media/widgetkit/widgets/'.$type.'/styles" filter="" exclude="" /><field type="spacer" name="generalsettingsseparator" label="General widget settings" />', '</fields></form>', '<field type="spacer" name="specificsettingsseparator" label="Widget style specific settings" /></fieldset>', 'field'), 
                         $xml
                 );
                 
