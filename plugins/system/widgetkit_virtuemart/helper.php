@@ -125,24 +125,6 @@ class WidgetkitVirtuemartWidgetkitHelper extends WidgetkitHelper {
                         $rec->content = json_decode($rec->content);
                         $rec->settings = $rec->content->settings;
                 } else {
-//                        static $map = array(
-//                                'gallery' => array('style'=>'default','width'=>'auto','height'=>'auto','autoplay'=>1,'order'=>'default','interval'=>5000,'duration'=>500,'index'=>0,'navigation'=>1,'buttons'=>1,'slices'=>20,'animated'=>'randomSimple','caption_animation_duration'=>500,'lightbox'=>0),
-//                                'slideshow' => array('style'=>'default','width'=>'auto','height'=>'auto','autoplay'=>1,'order'=>'default','interval'=>5000,'duration'=>500,'index'=>0,'navigation'=>1,'buttons'=>1,'slices'=>20,'animated'=>'randomSimple','caption_animation_duration'=>500),
-//                                'slideset' => array('style'=>'default','width'=>'auto','height'=>'auto','autoplay'=>1,'interval'=>5000,'index'=>0,'navigation'=>1,'buttons'=>1,'title'=>1,'duration'=>300,'items_per_set'=>3,'effect'=>'slide'),
-//                                'accordion' => array('style'=>'default','width'=>'auto','order'=>'default','duration'=>500,'index'=>0,'collapseall'=>1,'matchheight'=>1)
-//                        );
-//
-//                        $defaultSettings = $map[$type];
-//                        $settings = array();
-//                        $isWidthSet = false;
-//                        
-//                        foreach ($defaultSettings as $key => $defaultSetting) {
-//                                if (!isset($settings[$key]) || empty($settings[$key]) && $settings[$key] !== '0' && $settings[$key] !== 0) {
-//                                        $settings[$key] = $defaultSetting;
-//                                }
-//                                
-//                                if ($key == 'width' && !empty($settings[$key])) $isWidthSet = true;
-//                        }
                         if ($params instanceof JRegistry) $params = $params->toArray();
                         $keys = array_keys($params);
                         $k = array_search('widget_style', $keys);
@@ -158,7 +140,7 @@ class WidgetkitVirtuemartWidgetkitHelper extends WidgetkitHelper {
         } 
         
         private static function save($product, $params) {
-                $type = $params->get('widget_type', 'gallery');
+                $type = $params->get('widget_type', 'slideshow');
                 $widget = self::getWidget($product->virtuemart_product_id, $type, false, $params);
                 
                 if (!empty($widget) && !empty($widget->id)) return $widget->id;
@@ -328,18 +310,5 @@ class WidgetkitVirtuemartWidgetkitHelper extends WidgetkitHelper {
                 require_once JPATH_ADMINISTRATOR.'/components/com_widgetkit/widgetkit.php';
                 
                 return true;
-                
-//                jimport('joomla.plugin');
-//                
-//                $plg = JPluginHelper::getPlugin('system', 'widgetkit_virtuemart');
-//                
-//                if (!$plg) {
-//                        trigger_error('<b>Widgetkit Virtuemart plugin</b>: Widgetkit Virtuemart is either not installed properly or disabled.');
-//                        return;
-//                }
-//                
-//                $params = new JRegistry($plg->params);
-//                
-//                return $params;
         }
 }

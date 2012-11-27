@@ -25,7 +25,10 @@ class plgSystemWidgetkit_Virtuemart extends JPlugin {
                 $product_model = VmModel::getModel('product');
                 $product_model->addImages($product);
                 
-                $wkvm = WidgetkitVirtuemartWidgetkitHelper::render($product, $this->params);
+                $noImages = !isset($product->images) || empty($product->images) || (count($product->images) == 1 && empty($product->images[0]->file_name));
+                
+                $wkvm = $noImages ? '' : WidgetkitVirtuemartWidgetkitHelper::render($product, $this->params);
+                
                 $product->wkvm = $wkvm;
                 $product->text = str_replace('[wkvm]', $wkvm, $product->text);
                 
